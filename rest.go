@@ -72,7 +72,8 @@ func (c V1RESTClient) decode(req *http.Request, response Response) error {
 
 	decodeErr := json.NewDecoder(resp.Body).Decode(response)
 	if decodeErr != nil {
-		return fmt.Errorf("decoding failed: %s", decodeErr)
+		bytes, _ := ioutil.ReadAll(resp.Body)
+		return fmt.Errorf("decoding failed: %s, resp=%s", decodeErr, string(bytes))
 	}
 
 	return nil
