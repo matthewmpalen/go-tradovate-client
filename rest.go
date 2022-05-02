@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 )
 
@@ -65,9 +66,8 @@ func (c V1RESTClient) decode(req *http.Request, response Response) error {
 	defer resp.Body.Close()
 
 	if resp.StatusCode >= http.StatusBadRequest {
-		var errorMessage interface{}
-		json.NewDecoder(resp.Body).Decode(errorMessage)
-		return fmt.Errorf("Invalid status code: %d; resp=%s", resp.StatusCode, errorMessage)
+		bytes, _ := ioutil.ReadAll(resp.Body)
+		return fmt.Errorf("Invalid status code: %d; resp=%s", resp.StatusCode, string(bytes))
 	}
 
 	decodeErr := json.NewDecoder(resp.Body).Decode(response)
