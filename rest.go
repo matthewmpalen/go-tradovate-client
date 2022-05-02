@@ -9,38 +9,8 @@ import (
 )
 
 type (
-	Parameters interface{}
-	Data       interface{}
-	Response   interface{}
-
 	V1RESTClient struct {
 		baseClient
-	}
-
-	GetAccessTokenData struct {
-		Data
-		Name       string `json:"name"`
-		Password   string `json:"password"`
-		AppID      string `json:"appId"`
-		AppVersion string `json:"appVersion"`
-		CID        string `json:"cid"`
-		DeviceId   string `json:"deviceId"`
-		SEC        string `json:"sec"`
-	}
-
-	GetAccessTokenResponse struct {
-		Response
-		AccessToken               string `json:"accessToken"`
-		MDAccessToken             string `json:"mdAccessToken"`
-		ExpirationTime            string `json:"expirationTime"`
-		UserStatus                string `json:"userStatus"`
-		UserID                    int    `json:"userId"`
-		Name                      string `json:"name"`
-		HasLive                   bool   `json:"hasLive"`
-		OutdatedTAC               bool   `json:"outdatedTaC"`
-		HasFunded                 bool   `json:"hasFunded"`
-		HasMarketData             bool   `json:"hasMarketData"`
-		OutdatedLiquidationPolicy bool   `json:"outdatedLiquidationPolicy"`
 	}
 )
 
@@ -122,6 +92,42 @@ func (c V1RESTClient) GetAccessToken(data *GetAccessTokenData) (*GetAccessTokenR
 	url := fmt.Sprintf("%s/auth/accesstokenrequest", c.apiURL())
 
 	var resp *GetAccessTokenResponse
+	reqErr := c.request(http.MethodPost, url, nil, data, resp)
+	if reqErr != nil {
+		return nil, reqErr
+	}
+
+	return resp, nil
+}
+
+func (c V1RESTClient) PlaceOrder(data *PlaceOrderData) (*PlaceOrderResponse, error) {
+	url := fmt.Sprintf("%s/order/placeorder", c.apiURL())
+
+	var resp *PlaceOrderResponse
+	reqErr := c.request(http.MethodPost, url, nil, data, resp)
+	if reqErr != nil {
+		return nil, reqErr
+	}
+
+	return resp, nil
+}
+
+func (c V1RESTClient) CancelOrder(data *PlaceOrderData) (*CancelOrderResponse, error) {
+	url := fmt.Sprintf("%s/order/cancelorder", c.apiURL())
+
+	var resp *CancelOrderResponse
+	reqErr := c.request(http.MethodPost, url, nil, data, resp)
+	if reqErr != nil {
+		return nil, reqErr
+	}
+
+	return resp, nil
+}
+
+func (c V1RESTClient) PlaceOCO(data *PlaceOCOData) (*PlaceOCOResponse, error) {
+	url := fmt.Sprintf("%s/order/placeoco", c.apiURL())
+
+	var resp *PlaceOCOResponse
 	reqErr := c.request(http.MethodPost, url, nil, data, resp)
 	if reqErr != nil {
 		return nil, reqErr
