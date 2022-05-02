@@ -66,7 +66,7 @@ func (c V1RESTClient) addHeaders(req *http.Request) {
 	req.Header.Add("Accept", val)
 }
 
-func (c V1RESTClient) decode(req *http.Request, response Response) error {
+func (c V1RESTClient) unmarshal(req *http.Request, response Response) error {
 	c.addHeaders(req)
 
 	resp, doErr := c.baseClient.Do(req)
@@ -75,16 +75,24 @@ func (c V1RESTClient) decode(req *http.Request, response Response) error {
 	}
 
 	defer resp.Body.Close()
+	bytes, readErr := ioutil.ReadAll(resp.Body)
+	if readErr != nil {
+		return readErr
+	}
 
 	if resp.StatusCode >= http.StatusBadRequest {
-		bytes, _ := ioutil.ReadAll(resp.Body)
+
 		return fmt.Errorf("Invalid status code: %d; resp=%s", resp.StatusCode, string(bytes))
 	}
 
-	decodeErr := json.NewDecoder(resp.Body).Decode(response)
-	if decodeErr != nil {
-		bytes, _ := ioutil.ReadAll(resp.Body)
-		return fmt.Errorf("decoding failed: %s, status=%d resp=%s", decodeErr, resp.StatusCode, string(bytes))
+	unmarshalErr := json.Unmarshal(bytes, response)
+	if unmarshalErr != nil {
+		return fmt.Errorf(
+			"unmarshalling failed: %s, status=%d resp=%s",
+			unmarshalErr,
+			resp.StatusCode,
+			string(bytes),
+		)
 	}
 
 	return nil
@@ -102,9 +110,9 @@ func (c V1RESTClient) request(method, url string, params Parameters, data Data, 
 		return reqErr
 	}
 
-	decodeErr := c.decode(req, resp)
-	if decodeErr != nil {
-		return decodeErr
+	umarshalErr := c.unmarshal(req, resp)
+	if umarshalErr != nil {
+		return umarshalErr
 	}
 
 	return nil
