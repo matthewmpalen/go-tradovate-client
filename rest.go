@@ -30,6 +30,17 @@ type (
 
 	GetAccessTokenResponse struct {
 		Response
+		AccessToken               string `json:"accessToken"`
+		MDAccessToken             string `json:"mdAccessToken"`
+		ExpirationTime            string `json:"expirationTime"`
+		UserStatus                string `json:"userStatus"`
+		UserID                    int    `json:"userId"`
+		Name                      string `json:"name"`
+		HasLive                   bool   `json:"hasLive"`
+		OutdatedTAC               bool   `json:"outdatedTaC"`
+		HasFunded                 bool   `json:"hasFunded"`
+		HasMarketData             bool   `json:"hasMarketData"`
+		OutdatedLiquidationPolicy bool   `json:"outdatedLiquidationPolicy"`
 	}
 )
 
@@ -73,7 +84,7 @@ func (c V1RESTClient) decode(req *http.Request, response Response) error {
 	decodeErr := json.NewDecoder(resp.Body).Decode(response)
 	if decodeErr != nil {
 		bytes, _ := ioutil.ReadAll(resp.Body)
-		return fmt.Errorf("decoding failed: %s, resp=%s", decodeErr, string(bytes))
+		return fmt.Errorf("decoding failed: %s, status=%d resp=%s", decodeErr, resp.StatusCode, string(bytes))
 	}
 
 	return nil
