@@ -65,7 +65,9 @@ func (c V1RESTClient) decode(req *http.Request, response Response) error {
 	defer resp.Body.Close()
 
 	if resp.StatusCode >= http.StatusBadRequest {
-		return fmt.Errorf("Invalid status code: %d; resp=%s", resp.StatusCode, resp.Body)
+		var errorMessage interface{}
+		json.NewDecoder(resp.Body).Decode(errorMessage)
+		return fmt.Errorf("Invalid status code: %d; resp=%s", resp.StatusCode, errorMessage)
 	}
 
 	decodeErr := json.NewDecoder(resp.Body).Decode(response)
